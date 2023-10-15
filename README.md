@@ -18,6 +18,27 @@ options:
   -h, --help  show this help message and exit
 ```
 
+## `rename.py`
+```
+usage: rename.py [-h] [-t TARGET_DIR] [-e EXCLUDE] [-v] [-y] regex new-name
+
+Renames all files in a target directory
+
+positional arguments:
+  regex                 Base directory containing subdirs to zip
+  new-name              The new name format. This will be using python regex format, 
+                        so groups can be selected using '\\1' formatting
+
+options:
+  -h, --help            show this help message and exit
+  -t TARGET_DIR, --target-dir TARGET_DIR
+                        Directory to check
+  -e EXCLUDE, --exclude EXCLUDE
+                        Files to exclude
+  -v                    Verbose mode
+  -y                    Override questioning
+```
+
 ## `zipper.py`
 ```
 usage: zipper.py [-h] [BaseDir] [ZipPath]
