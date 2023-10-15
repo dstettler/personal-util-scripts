@@ -25,8 +25,8 @@ usage: rename.py [-h] [-t TARGET_DIR] [-e EXCLUDE] [-v] [-y] regex new-name
 Renames all files in a target directory
 
 positional arguments:
-  regex                 Base directory containing subdirs to zip
-  new-name              The new name format. This will be using python regex format, 
+  regex                 Regex to apply to target filenames
+  new-name              The new name format. This will be using python regex format,
                         so groups can be selected using '\\1' formatting
 
 options:
