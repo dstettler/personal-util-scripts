@@ -28,7 +28,7 @@ parser.add_argument(
     "regex",
     metavar="regex",
     type=str,
-    help="Base directory containing subdirs to zip",
+    help="Regex to apply to target filenames",
 
 )
 parser.add_argument(
