@@ -12,7 +12,7 @@ usage: batch-dl.py [-h] [BatchFile]
 Downloads list of files using youtube-dl [REQUIRES youtube-dl TO BE INSTALLED AND ON PATH]
 
 positional arguments:
-  BatchFile   Base directory containing subdirs to zip
+  BatchFile   File with list of newline-delimited video URLs to download
 
 options:
   -h, --help  show this help message and exit

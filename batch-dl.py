@@ -14,7 +14,7 @@ parser.add_argument(
     "batchfile",
     metavar="BatchFile",
     type=str,
-    help="Base directory containing subdirs to zip",
+    help="File with list of newline-delimited video URLs to download",
     nargs="?",
     default="batch.txt",
 )
