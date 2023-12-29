@@ -4,8 +4,45 @@ Keeping an organized central location makes sense, and hey, if someone else want
 
 For the sake of convenience, I'll add on the argument lists of each of the scripts as I add them here:
 
+## `batch-concat.py`
+**NOTE: This requires an existing installation of `ffmpeg` on your PATH**
+```
+usage: batch-concat.py [-h] {dir,file} ... new-file
+
+Uses FFmpeg (must be preinstalled) to concatenate videos of the same aspect ratio in a given directory.
+
+positional arguments:
+  {dir,file}  Mode to run
+  new-file    Name/path for the new concatenated file.
+
+options:
+  -h, --help  show this help message and exit
+```
+```
+usage: batch-concat.py dir [-h] [-e EXCLUDE] directory
+
+positional arguments:
+  directory             Directory to read files from. By default, all files in the directory will be added to the
+                        list, so ensure the contents contain only that which you intend to include.
+
+options:
+  -h, --help            show this help message and exit
+  -e EXCLUDE, --exclude EXCLUDE
+                        Filetypes to exclude. Can be a comma delimited list, or use this argument multiple times for
+                        multiple types.
+```
+```
+usage: batch-concat.py file [-h] file
+
+positional arguments:
+  file        Text file containing newline delimited list of files to concatenate.
+
+options:
+  -h, --help  show this help message and exit
+```
+
 ## `batch-dl.py`
-**NOTE: This requires an existing installation of youtube-dl on your PATH**
+**NOTE: This requires an existing installation of `youtube-dl` on your PATH**
 ```
 usage: batch-dl.py [-h] [BatchFile]
 
