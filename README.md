@@ -75,6 +75,8 @@ options:
   -v                    Verbose mode
   -y                    Override questioning
 ```
+### Example Usage
+`python rename.py -t ./ "(\w*).webp" "\\1.png"`
 
 ## `zipper.py`
 ```
@@ -89,3 +91,5 @@ positional arguments:
 options:
   -h, --help  show this help message and exit
 ```
+### Example Usage
+`python zipper.py -t "." "./zipped"`
