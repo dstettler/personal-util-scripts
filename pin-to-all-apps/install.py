@@ -14,7 +14,7 @@ ADD_NAME = "/reg/add.reg"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="pin-to-all-apps", description="(Un)Installs a regkey to run the pin-to-all-apps.py helper program to quickly pin programs to Windows' all apps menu from the File Explorer"
+        prog="install.py", description="(Un)Installs a regkey to run the pin-to-all-apps.py helper program to quickly pin programs to Windows' all apps menu from the File Explorer"
     )
 
     parser_mode_group = parser.add_mutually_exclusive_group()
