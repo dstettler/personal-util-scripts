@@ -28,11 +28,11 @@ args = parser.parse_args()
 zip_path = args.zipPath.rstrip("/")
 default_path = args.defaultPath.rstrip("/")
 
-dirs = [dir for dir in os.listdir(f"{default_path}") if os.path.isdir(dir)]
+dirs = [dir for dir in os.listdir(f"{default_path}") if os.path.isdir(f"{default_path}/{dir}")]
 
 if not os.path.exists(zip_path):
     os.mkdir(zip_path)
 
 for dir in dirs:
     print(f"Zipping: {dir}")
-    shutil.make_archive(f"{zip_path}/{dir}", "zip", dir)
+    shutil.make_archive(f"{zip_path}/{dir}", "zip", f"{default_path}/{dir}")
