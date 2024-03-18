@@ -92,4 +92,4 @@ options:
   -h, --help  show this help message and exit
 ```
 ### Example Usage
-`python zipper.py -t "." "./zipped"`
+`python zipper.py "." "./zipped"`
