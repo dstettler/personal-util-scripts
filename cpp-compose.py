@@ -2,7 +2,6 @@
 import argparse
 import os
 import json
-import re
 
 # Returns dictionary in the following format:
 # { "using": ["std::string", "std::vector"], "content": ["all lines of content"], "includes": ["iostream", "vector", "string"] }
