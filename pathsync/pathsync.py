@@ -132,7 +132,7 @@ def sync_path(src: str, dest: str, cache_file: str, ignores: list[str], rt_prefs
             src_hashes[relative_src_name] = [m.hexdigest(), str(os.path.getmtime(src_file.absolute().as_posix()))]
 
             # This will occur if the mtime is the different, but the hash is equivalent
-            if src_hashes[relative_src_name][0] == cached_hashes[relative_src_name][0]:
+            if ((relative_src_name in cached_hashes.keys()) and (src_hashes[relative_src_name][0] == cached_hashes[relative_src_name][0])):
                 cached_hashes[relative_src_name] = src_hashes[relative_src_name]
 
             if relative_src_name in files_to_remove:
@@ -166,7 +166,7 @@ def sync_path(src: str, dest: str, cache_file: str, ignores: list[str], rt_prefs
                 src_hashes[relative_src_name] = m.hexdigest()
 
                 # This will occur if the mtime is the different, but the hash is equivalent
-                if src_hashes[relative_src_name][0] == cached_hashes[relative_src_name][0]:
+                if ((relative_src_name in cached_hashes.keys()) and (src_hashes[relative_src_name][0] == cached_hashes[relative_src_name][0])):
                     cached_hashes[relative_src_name] = src_hashes[relative_src_name]
 
                 if relative_src_name in files_to_remove:
