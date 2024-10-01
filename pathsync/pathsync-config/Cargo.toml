@@ -1,0 +1,12 @@
+[package]
+name = "pathsync-config"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+iced = "0.13.1"
+iced_aw = {version = "0.11.0", default-features = false, features = ["menu", "quad"] }
+iced_fonts = "0.1.1"
+rfd = "0.15.0"
+serde = {version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"

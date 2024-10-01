@@ -1,3 +1,5 @@
 pin-to-all-apps/reg/
 pin-to-all-apps/.venv
 .vscode/
+
+pathsync/pathsync-config/target/
