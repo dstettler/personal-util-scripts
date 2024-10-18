@@ -3,3 +3,5 @@ pin-to-all-apps/.venv
 .vscode/
 
 pathsync/pathsync-config/target/
+pathsync/pathsync-config/Cargo.lock
+*.pdb
