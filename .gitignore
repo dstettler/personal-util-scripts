@@ -8,4 +8,6 @@ pathsync/pathsync-config/Cargo.lock
 
 pylintrc
 
+# Golang stuff
 *.exe
+*.sum

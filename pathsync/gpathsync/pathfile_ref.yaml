@@ -1,0 +1,11 @@
+pairs:
+  - src:    'A:\Documents'
+    cache:  'B:\customcachelocation.txt'
+    target: 'B:\Documents'
+
+  - src:    'A:\Utilities'
+    target: 'B:\Utilities'
+  
+  - src:    'A:\vols'
+    cache:  'B:\vols\cache'
+    target: 'B:\vols'
