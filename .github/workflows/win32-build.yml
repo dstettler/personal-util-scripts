@@ -17,18 +17,18 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
           submodules: recursive
-      - run: mkdir release
+      - run: mkdir personal-util-scripts/release
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
       - name: Download go deps
         run: |
-          cd ./pathsync/gpathsync
+          cd ./personal-util-scripts/pathsync/gpathsync
           go mod download
       - name: Build go bins
         run: |
-          go build ./pathsync/gpathsync/cmd/* -o release
+          go build ./personal-util-scripts/pathsync/gpathsync/cmd/* -o release
       - name: Set up Python environment
         uses: actions/setup-python@v5
         with:

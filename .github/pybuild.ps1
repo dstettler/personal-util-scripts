@@ -1,3 +1,4 @@
+cd personal-util-scripts
 mkdir pyrelease
 
 # Build simple utils
