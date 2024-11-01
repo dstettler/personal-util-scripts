@@ -9,3 +9,9 @@ pairs:
   - src:    'A:\vols'
     cache:  'B:\vols\cache'
     target: 'B:\vols'
+
+ignore:
+  - '.*debug\/'
+  - '.*release\/'
+  - '*\.vs\/'
+  - '.*\.git\/'
