@@ -25,11 +25,11 @@ jobs:
       - name: Download go deps
         run: |
           cd ./pathsync/gpathsync
-          go mod download
+          go mod tidy
       - name: Build go bins
         run: |
           cd ./pathsync/gpathsync
-          go build ./cmd/* -o ../../release
+          go build -o ../../release ./cmd/*
       - name: Set up Python environment
         uses: actions/setup-python@v5
         with:
