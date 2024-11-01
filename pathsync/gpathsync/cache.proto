@@ -1,0 +1,14 @@
+syntax = "proto3";
+package pathsync;
+
+option go_package = "./pathsync";
+
+message Cache {
+    message Pairs {
+        string hash = 1;
+        int64 modified = 2;
+    }
+
+    int32 version = 1;
+    map<string, Pairs> cache = 2;
+}
