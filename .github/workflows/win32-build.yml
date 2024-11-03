@@ -26,9 +26,11 @@ jobs:
         run: |
           cd ./pathsync/gpathsync
           go mod tidy
+
       - name: Build go bins
         run: |
           cd ./pathsync/gpathsync
+          pwd
           go build -v -o ../../release ./cmd/*
       - name: Set up Python environment
         uses: actions/setup-python@v5
