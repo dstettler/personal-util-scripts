@@ -32,7 +32,8 @@ jobs:
           cd .\pathsync\gpathsync
           Get-ChildItem "cmd" | 
           ForEach-Object {
-            go build -v -o ..\..\release .\cmd\$_\
+            echo ".\cmd\$_\"
+            go build -v -o "..\..\release" ".\cmd\$_\"
           }
       - name: Set up Python environment
         uses: actions/setup-python@v5
