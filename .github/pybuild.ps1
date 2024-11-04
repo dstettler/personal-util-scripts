@@ -48,10 +48,6 @@ ForEach-Object {
     }
 }
 
-ls .\
-ls .\pin-to-all-apps
-Copy-Item .\pin-to-all-apps\reg\* .\pyrelease\pin-to-all-apps -Recurse
-
 # Delete pin-to-all-apps intermediary files
 Remove-Item build -Recurse -Force 
 Remove-Item dist -Recurse -Force 
