@@ -1,0 +1,49 @@
+name: Utils Win32 CD
+
+on:
+  create:
+    tags:
+      - 'release-v**'
+
+jobs:
+  build:
+    name: Build and release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - run: mkdir release
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Download go deps
+        run: |
+          cd .\pathsync\gpathsync
+          go mod tidy
+
+      - name: Build go bins
+        run: |
+          cd .\pathsync\gpathsync
+          Get-ChildItem "cmd" | 
+          ForEach-Object {
+            go build -v -o "..\..\release" "$_"
+          }
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Python dependencies
+        run: |
+          pip install -U pyinstaller
+          pip install pywin32
+      - name: Build Python projects and zip pyrelease 
+        run: '.github\pybuild.ps1 $GITHUB_REF_NAME'
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release/*"
+          body: "Temp body"
+          draft: "true"
+    
