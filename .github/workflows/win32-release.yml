@@ -42,7 +42,7 @@ jobs:
           pip install -U pyinstaller
           pip install pywin32
       - name: Build Python projects and zip pyrelease 
-        run: '.github\pybuild.ps1 $GITHUB_REF_NAME'
+        run: '.github\pybuild.ps1 ${{github.ref_name}}'
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "release/*"
