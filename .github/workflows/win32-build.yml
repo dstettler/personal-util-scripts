@@ -24,17 +24,16 @@ jobs:
           go-version: '1.23.x'
       - name: Download go deps
         run: |
-          cd ./pathsync/gpathsync
+          cd .\pathsync\gpathsync
           go mod tidy
 
       - name: Build go bins
         run: |
-          cd ./pathsync/gpathsync
+          cd .\pathsync\gpathsync
           Get-ChildItem "cmd" | 
           ForEach-Object {
-            go build -v -o ..\..\release .\cmd\$_
+            go build -v -o ..\..\release .\cmd\$_\
           }
-
       - name: Set up Python environment
         uses: actions/setup-python@v5
         with:
