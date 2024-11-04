@@ -1,4 +1,3 @@
-cd personal-util-scripts
 mkdir pyrelease
 
 $archiveTag = ""
