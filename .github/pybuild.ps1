@@ -1,6 +1,14 @@
 cd personal-util-scripts
 mkdir pyrelease
 
+$archiveTag = ""
+
+if ($null -eq $args[0]) {
+    $archiveTag = $(git rev-parse HEAD)
+} else {
+    $archiveTag = $args[0]
+}
+
 # Build simple utils
 Get-ChildItem "." -Filter *.py | 
 ForEach-Object {
@@ -42,15 +50,13 @@ Copy-Item .\pin-to-all-apps\reg .\pyrelease\pin-to-all-apps -Recurse
 Remove-Item build -Recurse -Force 
 Remove-Item dist -Recurse -Force 
 
-$archiveCommit = $(git rev-parse HEAD)
-
 $compress = @{
     Path = ".\pyrelease\*"
     CompressionLevel = "Optimal"
-    DestinationPath = ".\pyrelease-$archiveCommit.zip"
+    DestinationPath = ".\pyrelease-$archiveTag.zip"
 }
 Compress-Archive @compress
 
 Remove-Item pyrelease -Recurse -Force 
 
-Copy-Item "pyrelease-$archiveCommit.zip" release
+Copy-Item "python-bins-$archiveTag.zip" release
