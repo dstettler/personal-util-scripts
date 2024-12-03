@@ -168,13 +168,21 @@ func sync(pair *TargetInfo, ignores []string) {
 	}
 	var inMessage pathsync.Cache2
 
+	if _, err := os.Stat(pair.Target); os.IsNotExist(err) {
+		if mkErr := os.MkdirAll(pair.Target, os.ModePerm); mkErr != nil {
+			fmt.Println("ERROR: Error creating directory", pair.Target)
+		}
+	}
+
 	// Read existing cache file to protobuf message
 	if fBytes, err := os.ReadFile(cachefileName); err == nil {
 		proto.Unmarshal(fBytes, &inMessage)
-	} else if _, err := os.Stat(cachefileName); !errors.Is(err, os.ErrNotExist) {
+	} else if _, err := os.Stat(cachefileName); errors.Is(err, os.ErrNotExist) {
 		// Cachefile does not exist, so create an empty message to compare against
 		inMessage.Version = CachefileVersion
 		inMessage.Cache = make(map[string]*pathsync.Cache2_Pairs)
+	} else {
+		fmt.Println("ERROR:", err)
 	}
 
 	// Verify cachefile version.
