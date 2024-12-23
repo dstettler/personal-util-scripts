@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	pathsync "pathsync/pkg"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/alecthomas/kong"
@@ -22,9 +23,10 @@ import (
 const CachefileVersion int32 = 2
 
 type TargetInfo struct {
-	Source      string `yaml:"src"`
-	Target      string `yaml:"target"`
-	TargetCache string `yaml:"cache,omitempty"`
+	Source      string   `yaml:"src"`
+	Target      string   `yaml:"target"`
+	TargetCache string   `yaml:"cache,omitempty"`
+	Ignores     []string `yaml:"ignore,omitempty"`
 }
 
 type Syncfile struct {
@@ -35,9 +37,36 @@ type Syncfile struct {
 var CLI struct {
 	Syncfile  string `arg:"" help:"Path of syncfile with all src:target pairs and corresponding cached hash locations"`
 	Silent    bool   `short:"s" optional:"" help:"Silent mode"`
+	YToAll    bool   `short:"y" optional:"" help:"Answer all prompts with yes" xor:"autoresponse"`
+	NToAll    bool   `short:"n" optional:"" help:"Answer all prompts with no" xor:"autoresponse"`
 	Delete    bool   `short:"d" optional:"" help:"Delete files from target"`
 	Rescan    bool   `short:"r" optional:"" help:"Rescan full src directory"`
 	Verbosity int    `type:"counter" short:"v" optional:"" help:"Verbosity counter" default:"0"`
+}
+
+// Asks a yes or no question until receiving a response.
+// Returns true if response is 'Y' or if defaultIsY is true and a blank response is given
+func boolPrompt(promptText string, defaultIsY bool) bool {
+	response := "placeholder"
+	validResponses := []string{"Y", "N", ""}
+	// fmt.Scan and its cohorts will not allow empty strings so an stdin reader is necessary here
+	reader := bufio.NewReader(os.Stdin)
+	for !slices.Contains(validResponses, response) {
+		if defaultIsY {
+			fmt.Println(promptText, "(Y/n)")
+		} else {
+			fmt.Println(promptText, "(y/N)")
+		}
+		response, _ = reader.ReadString('\n')
+		if response == "\r\n" || response == "\n" {
+			response = ""
+		}
+
+		response = strings.ToUpper(response)
+	}
+
+	// Return true if response is Y or if default is Y and no response given
+	return response == "Y" || (response == "" && defaultIsY)
 }
 
 // Returns tuple of MD5 hash of file at path and nil, or an empty string and an error.
@@ -95,6 +124,7 @@ func syncFileOrDir(
 	}
 
 	if !isDir {
+		// Filepath in format of "/relative-path/filename.txt"
 		filepathWithoutBase := path[len(pair.Source):]
 		newPath := filepath.Join(pair.Target, filepathWithoutBase)
 
@@ -107,7 +137,7 @@ func syncFileOrDir(
 
 			if match {
 				if CLI.Verbosity >= 3 {
-					fmt.Println("Regex matched:", ignoreString, ". Skipping", filepathWithoutBase)
+					fmt.Println("Regex matched:", ignoreString, "Skipping", filepathWithoutBase)
 				}
 
 				return nil
@@ -115,10 +145,18 @@ func syncFileOrDir(
 		}
 
 		if info, statErr := os.Stat(path); statErr == nil {
+			// If file is empty do not attempt to hash/copy it.
+			if info.Size() == 0 {
+				if CLI.Verbosity >= 3 {
+					fmt.Println("File is empty. It cannot be hashed and thus will not be copied.", filepathWithoutBase)
+				}
+			}
+
 			// Check if file is in cache, and if so, if the cached modified time is equal to the found modified time.
 			// If they are equivalent then skip re-hashing file.
 			if val, valPresent := inMessage.Cache[filepathWithoutBase]; valPresent && val.Modified == info.ModTime().Unix() {
-				if CLI.Verbosity >= 3 {
+				// Since this will likely be the most frequent situation, require a slightly higher verbosity to reduce spam.
+				if CLI.Verbosity >= 4 {
 					fmt.Println("ModTimes match. skipping", filepathWithoutBase)
 				}
 
@@ -128,12 +166,24 @@ func syncFileOrDir(
 				newCaches[filepathWithoutBase] = &cachePair
 
 				if !valPresent || val.Hash != hash {
-					// Since the new hash is different, we know the file needs to be (re-)copied
+					// Since the new hash is different, we know the file needs to be (re-)copied.
 					if CLI.Verbosity >= 1 {
-						fmt.Println("Copying", path, " -> ", newPath)
+						fmt.Print("Copying ", path, " -> ", newPath)
 					}
-					if err := copyFile(path, newPath); err != nil {
-						return err
+
+					var shouldCopy bool
+					if CLI.YToAll || CLI.NToAll {
+						shouldCopy = CLI.YToAll
+						fmt.Println("")
+					} else {
+						fmt.Print(". ")
+						shouldCopy = boolPrompt("Copy?", true)
+					}
+
+					if shouldCopy {
+						if err := copyFile(path, newPath); err != nil {
+							return err
+						}
 					}
 				} else if CLI.Verbosity >= 3 {
 					fmt.Println("Timestamps differ but hashes are identical. Skipping", filepathWithoutBase)
@@ -161,6 +211,14 @@ func syncFileOrDir(
 
 // Syncs all files in the source directory specified in the given pair.
 func sync(pair *TargetInfo, ignores []string) {
+	if pair.Ignores != nil {
+		ignores = append(ignores, pair.Ignores...)
+	}
+
+	if CLI.Verbosity >= 3 {
+		fmt.Println("Ignoring", ignores)
+	}
+
 	newCaches := make(map[string]*pathsync.Cache2_Pairs)
 	cachefileName := pair.TargetCache
 	if cachefileName == "" {
@@ -270,6 +328,11 @@ func main() {
 
 	if CLI.Silent {
 		CLI.Verbosity = -1
+
+		// If the user has not specified what to respond to prompts with, assume yes
+		if !CLI.YToAll && !CLI.NToAll {
+			CLI.YToAll = true
+		}
 	}
 
 	if info, err := os.Stat(CLI.Syncfile); errors.Is(err, os.ErrNotExist) || info.IsDir() {
