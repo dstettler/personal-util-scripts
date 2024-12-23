@@ -22,6 +22,7 @@ import (
 // Keep a version of the protobuf saved in case any future edits need to be made.
 const CachefileVersion int32 = 2
 
+// Struct containing per-pair preferences.
 type TargetInfo struct {
 	Source      string   `yaml:"src"`
 	Target      string   `yaml:"target"`
@@ -29,11 +30,13 @@ type TargetInfo struct {
 	Ignores     []string `yaml:"ignore,omitempty"`
 }
 
+// Struct containing top-level contents of the sync preferences file.
 type Syncfile struct {
 	Targets []TargetInfo `yaml:"pairs,flow"`
 	Ignores []string     `yaml:"ignore,omitempty"`
 }
 
+// Struct containing all command-line arguments.
 var CLI struct {
 	Syncfile  string `arg:"" help:"Path of syncfile with all src:target pairs and corresponding cached hash locations"`
 	Silent    bool   `short:"s" optional:"" help:"Silent mode"`
@@ -45,11 +48,11 @@ var CLI struct {
 }
 
 // Asks a yes or no question until receiving a response.
-// Returns true if response is 'Y' or if defaultIsY is true and a blank response is given
+// Returns true if response is 'Y' or if defaultIsY is true and a blank response is given.
 func boolPrompt(promptText string, defaultIsY bool) bool {
 	response := "placeholder"
 	validResponses := []string{"Y", "N", ""}
-	// fmt.Scan and its cohorts will not allow empty strings so an stdin reader is necessary here
+	// fmt.Scan and its cohorts will not allow empty strings so an stdin reader is necessary here.
 	reader := bufio.NewReader(os.Stdin)
 	for !slices.Contains(validResponses, response) {
 		if defaultIsY {
@@ -58,14 +61,13 @@ func boolPrompt(promptText string, defaultIsY bool) bool {
 			fmt.Println(promptText, "(y/N)")
 		}
 		response, _ = reader.ReadString('\n')
-		if response == "\r\n" || response == "\n" {
-			response = ""
-		}
+		response = strings.ReplaceAll(response, "\r", "")
+		response = strings.ReplaceAll(response, "\n", "")
 
 		response = strings.ToUpper(response)
 	}
 
-	// Return true if response is Y or if default is Y and no response given
+	// Return true if response is Y or if default is Y and no response given.
 	return response == "Y" || (response == "" && defaultIsY)
 }
 
@@ -92,6 +94,8 @@ func copyFile(src, dest string) error {
 
 	destFi, destFiErr := os.Create(dest)
 	if destFiErr != nil {
+		srcFi.Close()
+
 		return destFiErr
 	}
 
@@ -124,7 +128,7 @@ func syncFileOrDir(
 	}
 
 	if !isDir {
-		// Filepath in format of "/relative-path/filename.txt"
+		// Filepath in format of "/relative-path/filename.txt".
 		filepathWithoutBase := path[len(pair.Source):]
 		newPath := filepath.Join(pair.Target, filepathWithoutBase)
 
@@ -147,7 +151,7 @@ func syncFileOrDir(
 		if info, statErr := os.Stat(path); statErr == nil {
 			// If file is empty do not attempt to hash/copy it.
 			if info.Size() == 0 {
-				if CLI.Verbosity >= 3 {
+				if CLI.Verbosity >= 2 {
 					fmt.Println("File is empty. It cannot be hashed and thus will not be copied.", filepathWithoutBase)
 				}
 			}
@@ -160,11 +164,9 @@ func syncFileOrDir(
 					fmt.Println("ModTimes match. skipping", filepathWithoutBase)
 				}
 
+				// Leave hash as-is (since the cached one should be the same as current).
 				newCaches[filepathWithoutBase] = inMessage.Cache[filepathWithoutBase]
 			} else if hash, hashErr := md5Hash(path); hashErr == nil {
-				cachePair := pathsync.Cache2_Pairs{Hash: hash, Modified: info.ModTime().Unix()}
-				newCaches[filepathWithoutBase] = &cachePair
-
 				if !valPresent || val.Hash != hash {
 					// Since the new hash is different, we know the file needs to be (re-)copied.
 					if CLI.Verbosity >= 1 {
@@ -181,6 +183,9 @@ func syncFileOrDir(
 					}
 
 					if shouldCopy {
+						// Update cache and copy file.
+						cachePair := pathsync.Cache2_Pairs{Hash: hash, Modified: info.ModTime().Unix()}
+						newCaches[filepathWithoutBase] = &cachePair
 						if err := copyFile(path, newPath); err != nil {
 							return err
 						}
