@@ -2,6 +2,8 @@ pairs:
   - src:    'A:\Documents'
     cache:  'B:\customcachelocation.txt'
     target: 'B:\Documents'
+    ignore:
+      - '/ignored'
 
   - src:    'A:\Utilities'
     target: 'B:\Utilities'
@@ -10,6 +12,7 @@ pairs:
     cache:  'B:\vols\cache'
     target: 'B:\vols'
 
+# Global ignores
 ignore:
   - '.*debug\/'
   - '.*release\/'
