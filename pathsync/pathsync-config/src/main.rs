@@ -1,11 +1,13 @@
+use iced::widget::{
+    button, pick_list, row, text, text_input, Button, Column, Container, Row, Text, TextInput,
+};
 use iced::{Alignment, Element, Length, Settings};
-use iced::widget::{button, pick_list, row, text, text_input, Button, Column, Container, Row, Text, TextInput};
+use rfd::FileDialog;
 use serde::de::IntoDeserializer;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use std::{env, fs};
 use std::process::Command;
-use rfd::FileDialog;
+use std::{env, fs};
 
 const PROGRAM_TITLE: &str = "Pathsync Configurator";
 const PATHSYNC_EXECUTABLE_BASE: &str = "gpathsync";
@@ -66,7 +68,12 @@ impl ConfigEditor {
                     let ignore_list = if self.ignore_value.is_empty() {
                         None
                     } else {
-                        Some(self.ignore_value.split(',').map(|s| s.trim().to_string()).collect())
+                        Some(
+                            self.ignore_value
+                                .split(',')
+                                .map(|s| s.trim().to_string())
+                                .collect(),
+                        )
                     };
                     self.config.pairs.push(SyncPair {
                         src: self.src_value.clone(),
@@ -91,7 +98,8 @@ impl ConfigEditor {
             }
             Message::SaveConfig => {
                 if let Some(ref file) = self.config_file {
-                    self.config.ignore = self.global_ignore_value
+                    self.config.ignore = self
+                        .global_ignore_value
                         .split(',')
                         .map(|s| s.trim().to_string())
                         .collect();
@@ -99,12 +107,14 @@ impl ConfigEditor {
                 }
             }
             Message::LoadConfig => {
-                let path = FileDialog::new().pick_file().map(|p| p.to_string_lossy().into_owned());
+                let path = FileDialog::new()
+                    .pick_file()
+                    .map(|p| p.to_string_lossy().into_owned());
                 self.update(Message::FilePicked(path));
             }
             Message::RunSync => {
                 // Get current executable directory and run gpathsync in same dir (will fail if running from symlink)
-                if let Some(ref file) = self.config_file {                    
+                if let Some(ref file) = self.config_file {
                     let executable = env::current_exe().unwrap();
                     if let Some(exe_parent) = executable.parent() {
                         let executable_name: String;
@@ -119,10 +129,10 @@ impl ConfigEditor {
                         target_path.push(executable_name);
 
                         let _ = Command::new(format!("{}", target_path.display()))
-                                .arg("-r")
-                                .arg("-s")
-                                .arg(file)
-                                .spawn();
+                            .arg("-r")
+                            .arg("-s")
+                            .arg(file)
+                            .spawn();
                         println!("{}", target_path.display())
                     }
                 }
@@ -141,25 +151,39 @@ impl ConfigEditor {
     }
 
     fn view(&self) -> Element<Message> {
-        let pairs: Element<_> = self.config.pairs.iter().enumerate().fold(Column::new().spacing(10), |column, (index, pair)| {
-            column.push(
-                row![
-                text!("{} -> {}", pair.src, pair.target),
-                button("Edit").on_press(Message::EditPair(index)),
-                button("Remove").on_press(Message::RemovePair(index))
-                ].spacing(10)
-            )
-        }).into();
-        
+        let pairs: Element<_> = self
+            .config
+            .pairs
+            .iter()
+            .enumerate()
+            .fold(Column::new().spacing(10), |column, (index, pair)| {
+                column.push(
+                    row![
+                        text!("{} -> {}", pair.src, pair.target),
+                        button("Edit").on_press(Message::EditPair(index)),
+                        button("Remove").on_press(Message::RemovePair(index))
+                    ]
+                    .spacing(10),
+                )
+            })
+            .into();
+
         let load_btn = button("Load Config").on_press(Message::LoadConfig);
         let add_btn = button("Add Pair").on_press(Message::AddPair);
         let save_btn = button("Save Config").on_press(Message::SaveConfig);
         let run_btn = button("Run Utility").on_press(Message::RunSync);
 
-        let src_input_field = text_input("Source Path", &self.src_value).on_input(Message::SrcChanged);
-        let target_input_field = text_input("Target Path", &self.target_value).on_input(Message::TargetChanged);
-        let pair_ignore_input_field = text_input("Ignores (comma-separated)", &self.ignore_value).on_input(Message::IgnoreChanged);
-        let global_ignore_input_field = text_input("Global Ignores (comma-separated)", &self.global_ignore_value).on_input(Message::GlobalIgnoreChanged);
+        let src_input_field =
+            text_input("Source Path", &self.src_value).on_input(Message::SrcChanged);
+        let target_input_field =
+            text_input("Target Path", &self.target_value).on_input(Message::TargetChanged);
+        let pair_ignore_input_field = text_input("Ignores (comma-separated)", &self.ignore_value)
+            .on_input(Message::IgnoreChanged);
+        let global_ignore_input_field = text_input(
+            "Global Ignores (comma-separated)",
+            &self.global_ignore_value,
+        )
+        .on_input(Message::GlobalIgnoreChanged);
 
         let content = iced::widget::column![
             text!("{}", PROGRAM_TITLE),
@@ -172,8 +196,11 @@ impl ConfigEditor {
             global_ignore_input_field,
             save_btn,
             run_btn,
-            pairs].spacing(10).into();
-        
+            pairs
+        ]
+        .spacing(10)
+        .into();
+
         content
     }
 }
