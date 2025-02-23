@@ -177,7 +177,7 @@ impl ConfigEditor {
             text_input("Source Path", &self.src_value).on_input(Message::SrcChanged);
         let target_input_field =
             text_input("Target Path", &self.target_value).on_input(Message::TargetChanged);
-        let pair_ignore_input_field = text_input("Ignores (comma-separated)", &self.ignore_value)
+        let pair_ignore_input_field = text_input("Pair Ignores (comma-separated)", &self.ignore_value)
             .on_input(Message::IgnoreChanged);
         let global_ignore_input_field = text_input(
             "Global Ignores (comma-separated)",
